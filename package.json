@@ -40,6 +40,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
+    "@tabler/icons-react": "^3.34.1",
     "ai": "^5.0.9",
     "ai-elements": "^1.0.2",
     "better-auth": "^1.3.4",

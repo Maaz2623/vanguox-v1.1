@@ -33,7 +33,7 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
-import { CopyIcon, GlobeIcon, RefreshCcwIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, GlobeIcon, RefreshCcwIcon } from "lucide-react";
 import { Response } from "@/components/ai-elements/response";
 import { Action, Actions } from "@/components/ai-elements/actions";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,16 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
   const [model, setModel] = useState<string>(models[0].id);
 
   const initialMessage = searchParams.get("message");
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 2000);
+  };
 
   const { messages, status, sendMessage, stop, regenerate } = useChat({
     id: chatId,
@@ -154,17 +164,22 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                         onClick={() => regenerate()}
                                         label="Retry"
                                       >
-                                        <RefreshCcwIcon className="size-3" />
+                                        <RefreshCcwIcon className="size-3.5" />
                                       </Action>
                                       <Action
                                         onClick={() =>
-                                          navigator.clipboard.writeText(
+                                          handleCopy(
+                                            `${message.id}-${i}`,
                                             part.text
                                           )
                                         }
                                         label="Copy"
                                       >
-                                        <CopyIcon className="size-3" />
+                                        {copiedId === `${message.id}-${i}` ? (
+                                          <CheckIcon className="size-3.5" />
+                                        ) : (
+                                          <CopyIcon className="size-3.5" />
+                                        )}
                                       </Action>
                                     </Actions>
                                   )}

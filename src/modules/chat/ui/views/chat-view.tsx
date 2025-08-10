@@ -14,7 +14,6 @@ import {
   PromptInputModelSelectTrigger,
   PromptInputModelSelectValue,
   PromptInputSubmit,
-  PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
@@ -34,16 +33,10 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
-import { CopyIcon, GlobeIcon, MicIcon, RefreshCcwIcon } from "lucide-react";
+import { CopyIcon, GlobeIcon, RefreshCcwIcon } from "lucide-react";
 import { Response } from "@/components/ai-elements/response";
 import { Action, Actions } from "@/components/ai-elements/actions";
 import { cn } from "@/lib/utils";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/components/ai-elements/source";
 import {
   Reasoning,
   ReasoningContent,
@@ -220,7 +213,9 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                 if (e.shiftKey) return; // Allow newline
                 e.preventDefault();
                 if (e.ctrlKey || !e.metaKey) {
-                  handleSubmit;
+                  handleSubmit(
+                    e as unknown as React.FormEvent<HTMLFormElement>
+                  );
                 }
               }
             }}

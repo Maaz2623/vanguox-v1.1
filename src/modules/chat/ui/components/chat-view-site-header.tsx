@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Typewriter } from "react-simple-typewriter";
+import { api } from "../../../../../convex/_generated/api";
 
 export function ChatViewSiteHeader({ chatId }: { chatId: string }) {
   const data = useQuery(api.chats.getChat, { chatId });

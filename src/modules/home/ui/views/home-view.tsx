@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export const HomeView = () => {
   return (
@@ -22,8 +21,6 @@ export const HomeView = () => {
 };
 
 const Form = () => {
-  const [input, setInput] = useState("");
-
   const router = useRouter();
 
   const onSubmit = () => {

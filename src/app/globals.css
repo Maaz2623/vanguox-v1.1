@@ -120,3 +120,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* For Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 4px; /* Makes it thinner */
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent; /* Removes the thumb */
+}
+
+::-webkit-scrollbar-track {
+  background: black; /* Optional: hides track */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* Makes it thinner */
+  scrollbar-color: transparent transparent; /* No thumb color */
+}

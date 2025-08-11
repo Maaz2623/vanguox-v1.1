@@ -11,11 +11,11 @@ interface Props {
 
 export const AIWebPreview = ({ url }: Props) => {
   return (
-    <WebPreview defaultUrl={url}>
-      <WebPreviewNavigation>
+    <WebPreview defaultUrl={url} className="rounded-none border-none">
+      <WebPreviewNavigation className="">
         <WebPreviewUrl src={url} />
       </WebPreviewNavigation>
-      <WebPreviewBody src={url} />
+      <WebPreviewBody src={url} className="bg-green-500" />
     </WebPreview>
   );
 };

@@ -45,7 +45,6 @@ import {
 import { Loader } from "@/components/ai-elements/loader";
 import Image from "next/image";
 import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
-import { useSidebar } from "@/components/ui/sidebar";
 import { AIWebPreview } from "@/ai/components/web-preview";
 import { FragmentSelector } from "@/ai/components/fragment-selector";
 
@@ -56,8 +55,6 @@ interface Props {
 
 export const ChatView = ({ chatId, initialMessages }: Props) => {
   const searchParams = useSearchParams();
-
-  const { setOpen } = useSidebar();
 
   const [webSearch, setWebsearch] = useState(false);
 
@@ -141,22 +138,20 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
               p.output as {
                 webUrl: string;
               }
-            )?.webUrl ?? null;
+            ).webUrl ?? null;
           return true;
         }
         return false;
       }) ?? false;
 
     if (lastHasOutput && webUrl) {
-      setOpen(false);
       setAppPreview(true);
       setPreviewUrl(webUrl);
     } else {
-      setOpen(true);
       setAppPreview(false);
       setPreviewUrl(null);
     }
-  }, [messages, setOpen]);
+  }, [messages]);
 
   return (
     <div className="flex w-full h-screen">
@@ -254,7 +249,15 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                     webUrl: string;
                                   };
                                   return (
-                                    <FragmentSelector webUrl={output.webUrl} />
+                                    <div className="my-3" key={output.webUrl}>
+                                      <FragmentSelector
+                                        previewUrl={previewUrl}
+                                        setAppPreview={setAppPreview}
+                                        setPreviewUrl={setPreviewUrl}
+                                        webUrl={output.webUrl}
+                                        key={output.webUrl}
+                                      />
+                                    </div>
                                   );
                               }
                             default:

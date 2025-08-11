@@ -5,7 +5,7 @@ import z from "zod";
 
 export const myToolSet = {
     appBuilder: tool({
-        description: "You are an expert coder. After building the app return the url no other text.",
+        description: "You are an expert coder. After building the app describe it well in a paragraph.",
         inputSchema: z.object({
             prompt: z.string().describe("The prompt to build the app from.")
         }),

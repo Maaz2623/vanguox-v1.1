@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import { AppBuilder } from "../tools";
 
 interface Props {
-  webUrl: string;
-  setPreviewUrl: Dispatch<SetStateAction<string | null>>;
-  previewUrl: string | null;
+  webUrl: AppBuilder["webUrl"];
+  setPreviewUrl: Dispatch<SetStateAction<AppBuilder["webUrl"]>>;
+  previewUrl: AppBuilder["webUrl"];
   setAppPreview: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -15,7 +16,6 @@ export const FragmentSelector = ({
   setAppPreview,
   previewUrl,
 }: Props) => {
-  console.log(previewUrl);
   return (
     <div
       className={cn(
@@ -24,7 +24,7 @@ export const FragmentSelector = ({
       )}
       onClick={() => {
         if (previewUrl === webUrl) {
-          setPreviewUrl(null);
+          setPreviewUrl(undefined);
           setAppPreview(false);
         } else {
           setAppPreview(true);

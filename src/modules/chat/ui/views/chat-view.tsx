@@ -47,6 +47,7 @@ import Image from "next/image";
 import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
 import { AIWebPreview } from "@/ai/components/web-preview";
 import { FragmentSelector } from "@/ai/components/fragment-selector";
+import { AppBuilder } from "@/ai/tools";
 
 interface Props {
   chatId: string;
@@ -104,7 +105,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     window.history.replaceState({}, "", url.toString());
   }, [initialMessage, sendMessage]);
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<AppBuilder["webUrl"]>(undefined);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -149,7 +150,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       setPreviewUrl(webUrl);
     } else {
       setAppPreview(false);
-      setPreviewUrl(null);
+      setPreviewUrl(undefined);
     }
   }, [messages]);
 
@@ -245,9 +246,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                 case "input-available":
                                   return <AppBuilderLoader key={i} />;
                                 case "output-available":
-                                  const output = part.output as {
-                                    webUrl: string;
-                                  };
+                                  const output = part.output as AppBuilder;
                                   return (
                                     <div className="my-3" key={output.webUrl}>
                                       <FragmentSelector
@@ -348,7 +347,11 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       {/* Preview section */}
       {appPreview && previewUrl && (
         <div className="w-1/2 border-l border-gray-200 overflow-y-auto">
-          <AIWebPreview url={previewUrl} />
+          <AIWebPreview
+            setAppPreview={setAppPreview}
+            url={previewUrl}
+            setPreviewUrl={setPreviewUrl}
+          />
         </div>
       )}
     </div>

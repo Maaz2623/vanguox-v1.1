@@ -21,8 +21,13 @@ export const myToolSet = {
             });
 
             return {
-                webUrl: result.demo
+                webUrl: result.demo,
+                files: result.files
             }
         }
     })
 }
+
+export type AppBuilder = Awaited<
+  ReturnType<NonNullable<typeof myToolSet["appBuilder"]["execute"]>>
+>;

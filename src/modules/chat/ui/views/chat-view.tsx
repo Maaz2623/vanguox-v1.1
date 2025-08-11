@@ -47,6 +47,7 @@ import Image from "next/image";
 import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
 import { useSidebar } from "@/components/ui/sidebar";
 import { AIWebPreview } from "@/ai/components/web-preview";
+import { FragmentSelector } from "@/ai/components/fragment-selector";
 
 interface Props {
   chatId: string;
@@ -248,6 +249,13 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                               switch (part.state) {
                                 case "input-available":
                                   return <AppBuilderLoader key={i} />;
+                                case "output-available":
+                                  const output = part.output as {
+                                    webUrl: string;
+                                  };
+                                  return (
+                                    <FragmentSelector webUrl={output.webUrl} />
+                                  );
                               }
                             default:
                               return null;

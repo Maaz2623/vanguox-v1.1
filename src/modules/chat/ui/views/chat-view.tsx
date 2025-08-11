@@ -44,6 +44,9 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { Loader } from "@/components/ai-elements/loader";
 import Image from "next/image";
+import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
+import { useSidebar } from "@/components/ui/sidebar";
+import { AIWebPreview } from "@/ai/components/web-preview";
 
 interface Props {
   chatId: string;
@@ -52,6 +55,8 @@ interface Props {
 
 export const ChatView = ({ chatId, initialMessages }: Props) => {
   const searchParams = useSearchParams();
+
+  const { setOpen } = useSidebar();
 
   const [webSearch, setWebsearch] = useState(false);
 
@@ -85,6 +90,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
 
   const hasSentInitialMessage = useRef(false);
 
+  const [appPreview, setAppPreview] = useState(false);
+
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
@@ -98,6 +105,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     url.searchParams.delete("message");
     window.history.replaceState({}, "", url.toString());
   }, [initialMessage, sendMessage]);
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -119,12 +128,47 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     setPrompt("");
   };
 
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+
+    let webUrl: string | null = null;
+    const lastHasOutput =
+      lastMessage?.parts?.some((p) => {
+        if (p.type === "tool-appBuilder" && p.state === "output-available") {
+          webUrl =
+            (
+              p.output as {
+                webUrl: string;
+              }
+            )?.webUrl ?? null;
+          return true;
+        }
+        return false;
+      }) ?? false;
+
+    if (lastHasOutput && webUrl) {
+      setOpen(false);
+      setAppPreview(true);
+      setPreviewUrl(webUrl);
+    } else {
+      setOpen(true);
+      setAppPreview(false);
+      setPreviewUrl(null);
+    }
+  }, [messages, setOpen]);
+
   return (
-    <div className="w-full pb-2 mx-auto relative size-full h-screen">
-      <div className="flex flex-col h-full">
-        <Conversation className="h-full">
+    <div className="flex w-full h-screen">
+      {/* Chat section */}
+      <div
+        className={cn(
+          "flex flex-col h-full px-8 transition-all duration-300",
+          appPreview ? "w-1/2" : "w-full"
+        )}
+      >
+        <Conversation className="flex-1 overflow-y-auto">
           <ConversationContent>
-            <div className="w-3/4 mx-auto pb-32">
+            <div className={cn("w-3/4 mx-auto pb-32", appPreview && "w-full")}>
               {messages.map((message) => (
                 <div key={message.id} className="flex items-start">
                   <Message
@@ -141,7 +185,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                       {message.role === "assistant" && (
                         <div className="flex gap-x-3 -ml-4">
                           <MessageAvatar src="/logo.svg" className="size-5" />
-                          <span className="font-semibold">Vanguox </span>
+                          <span className="font-semibold">Vanguox</span>
                         </div>
                       )}
                       <div
@@ -185,6 +229,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   )}
                                 </div>
                               );
+
                             case "reasoning":
                               return (
                                 <Reasoning
@@ -198,6 +243,12 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   </ReasoningContent>
                                 </Reasoning>
                               );
+
+                            case "tool-appBuilder":
+                              switch (part.state) {
+                                case "input-available":
+                                  return <AppBuilderLoader key={i} />;
+                              }
                             default:
                               return null;
                           }
@@ -213,19 +264,23 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="w-3/4 mx-auto p-1">
+        {/* Input bar */}
+        <PromptInput
+          onSubmit={handleSubmit}
+          className={cn("w-3/4 mx-auto p-1", appPreview && "w-full mx-auto")}
+        >
           <TextAreaAutoSize
             rows={1}
             disabled={status === "submitted"}
             maxRows={3}
             autoFocus={true}
-            onChange={(e) => setPrompt(e.target.value)}
             value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
             className="p-4 resize-none text-sm border-none w-full outline-none"
             placeholder="Ask me anything..."
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                if (e.shiftKey) return; // Allow newline
+                if (e.shiftKey) return;
                 e.preventDefault();
                 if (e.ctrlKey || !e.metaKey) {
                   handleSubmit(
@@ -278,6 +333,13 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           </PromptInputToolbar>
         </PromptInput>
       </div>
+
+      {/* Preview section */}
+      {appPreview && previewUrl && (
+        <div className="w-1/2 border-l border-gray-200 overflow-y-auto">
+          <AIWebPreview url={previewUrl} />
+        </div>
+      )}
     </div>
   );
 };

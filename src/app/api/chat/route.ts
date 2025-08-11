@@ -1,4 +1,5 @@
 import { saveChat, updateChatTitle } from '@/ai/functions';
+import { myToolSet } from '@/ai/tools';
 import { streamText, UIMessage, convertToModelMessages, createIdGenerator, smoothStream } from 'ai';
 
 // Allow streaming responses up to 30 seconds
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
       delayInMs: 50,
       chunking: "word"
     }),
+    tools: myToolSet,
     system:
       'You are a helpful assistant that can answer questions and help with tasks',
   });

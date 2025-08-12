@@ -65,6 +65,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const [fragmentOpen, setFragmentOpen] = useState(false);
+
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -143,7 +145,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                 webUrl: string;
               }
             ).webUrl ?? null;
-          files = (p.output as AppBuilder["files"]) ?? null;
+          files = (p.output as AppBuilder).files ?? null;
           return true;
         }
         return false;
@@ -153,6 +155,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       setAppPreview(true);
       setPreviewUrl(webUrl);
       setFiles(files);
+      setFragmentOpen(true);
     } else {
       setAppPreview(false);
       setPreviewUrl(undefined);
@@ -164,14 +167,11 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     <div className="flex w-full h-screen">
       {/* Chat section */}
       <div
-        className={cn(
-          "flex flex-col h-full px-8 transition-all duration-300",
-          appPreview ? "w-1/2" : "w-full"
-        )}
+        className={cn("flex flex-col h-full px-8 transition-all duration-300")}
       >
         <Conversation className="flex-1 overflow-y-auto">
           <ConversationContent>
-            <div className={cn("w-3/4 mx-auto pb-32", appPreview && "w-full")}>
+            <div className={cn("w-3/4 mx-auto pb-32")}>
               {messages.map((message) => (
                 <div key={message.id} className="flex items-start">
                   <Message
@@ -256,11 +256,15 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   return (
                                     <div className="my-3" key={output.webUrl}>
                                       <FragmentSelector
+                                        files={output.files}
                                         previewUrl={previewUrl}
                                         setAppPreview={setAppPreview}
                                         setPreviewUrl={setPreviewUrl}
+                                        setFiles={setFiles}
                                         webUrl={output.webUrl}
                                         key={output.webUrl}
+                                        setOpen={setFragmentOpen}
+                                        open={fragmentOpen}
                                       />
                                     </div>
                                   );
@@ -283,10 +287,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
         {/* Input bar */}
         <PromptInput
           onSubmit={handleSubmit}
-          className={cn(
-            "w-3/4 mx-auto p-1 mb-2",
-            appPreview && "w-full mx-auto"
-          )}
+          className={cn("w-3/4 mx-auto p-1 mb-2")}
         >
           <TextAreaAutoSize
             rows={1}
@@ -354,8 +355,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       </div>
 
       {/* Preview section */}
-      {appPreview && previewUrl && (
-        <div className="w-1/2 border-l border-gray-200 overflow-y-auto">
+      {/* {appPreview && previewUrl && (
+        <div className="w-3/4 border-l border-gray-200 max-w-3/4">
           <AIWebPreview
             files={files}
             setAppPreview={setAppPreview}
@@ -363,6 +364,16 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
             setPreviewUrl={setPreviewUrl}
           />
         </div>
+      )} */}
+      {appPreview && previewUrl && (
+        <AIWebPreview
+          open={fragmentOpen}
+          setOpen={setFragmentOpen}
+          files={files}
+          setAppPreview={setAppPreview}
+          url={previewUrl}
+          setPreviewUrl={setPreviewUrl}
+        />
       )}
     </div>
   );

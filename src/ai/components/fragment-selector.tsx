@@ -8,12 +8,19 @@ interface Props {
   setPreviewUrl: Dispatch<SetStateAction<AppBuilder["webUrl"]>>;
   previewUrl: AppBuilder["webUrl"];
   setAppPreview: Dispatch<SetStateAction<boolean>>;
+  setFiles: Dispatch<SetStateAction<AppBuilder["files"]>>;
+  files: AppBuilder["files"];
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 export const FragmentSelector = ({
   webUrl,
   setPreviewUrl,
   setAppPreview,
+  setFiles,
+  files,
+  setOpen,
   previewUrl,
 }: Props) => {
   return (
@@ -26,7 +33,11 @@ export const FragmentSelector = ({
         if (previewUrl === webUrl) {
           setPreviewUrl(undefined);
           setAppPreview(false);
+          setFiles(undefined);
+          setOpen(false);
         } else {
+          setFiles(files);
+          setOpen(true);
           setAppPreview(true);
           setPreviewUrl(webUrl);
         }

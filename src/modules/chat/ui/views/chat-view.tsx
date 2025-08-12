@@ -107,6 +107,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
 
   const [previewUrl, setPreviewUrl] = useState<AppBuilder["webUrl"]>(undefined);
 
+  const [files, setFiles] = useState<AppBuilder["files"]>(undefined);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "streaming") {
@@ -131,6 +133,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     const lastMessage = messages[messages.length - 1];
 
     let webUrl: string | null = null;
+    let files: AppBuilder["files"] | null = undefined;
     const lastHasOutput =
       lastMessage?.parts?.some((p) => {
         if (p.type === "tool-appBuilder" && p.state === "output-available") {
@@ -140,6 +143,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                 webUrl: string;
               }
             ).webUrl ?? null;
+          files = (p.output as AppBuilder["files"]) ?? null;
           return true;
         }
         return false;
@@ -148,9 +152,11 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     if (lastHasOutput && webUrl) {
       setAppPreview(true);
       setPreviewUrl(webUrl);
+      setFiles(files);
     } else {
       setAppPreview(false);
       setPreviewUrl(undefined);
+      setFiles(undefined);
     }
   }, [messages]);
 
@@ -277,7 +283,10 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
         {/* Input bar */}
         <PromptInput
           onSubmit={handleSubmit}
-          className={cn("w-3/4 mx-auto p-1", appPreview && "w-full mx-auto")}
+          className={cn(
+            "w-3/4 mx-auto p-1 mb-2",
+            appPreview && "w-full mx-auto"
+          )}
         >
           <TextAreaAutoSize
             rows={1}
@@ -348,6 +357,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       {appPreview && previewUrl && (
         <div className="w-1/2 border-l border-gray-200 overflow-y-auto">
           <AIWebPreview
+            files={files}
             setAppPreview={setAppPreview}
             url={previewUrl}
             setPreviewUrl={setPreviewUrl}

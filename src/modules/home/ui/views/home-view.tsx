@@ -23,14 +23,6 @@ import { useState } from "react";
 export const HomeView = () => {
   return (
     <div className="bg-sidebar h-screen flex flex-col justify-center items-center">
-      <div className="flex flex-col gap-y-4 text-center -mt-20 justify-center items-center">
-        <Image src={`/logo.svg`} alt="logo" width={100} height={100} />
-        <h1 className="text-4xl font-semibold">Vanguox AI</h1>
-        <p className="text-md text-muted-foreground">
-          A powerful AI system designed to enhance ideas and streamline
-          creation.
-        </p>
-      </div>
       <Form />
     </div>
   );
@@ -55,7 +47,7 @@ const Form = () => {
     "A powerful AI system designed to enhance ideas and streamline creation.";
 
   return (
-    <div className="h-screen">
+    <div className="h-screen w-3/4">
       <AnimatePresence mode="wait" initial={true}>
         <motion.div
           key="new-messages-view-logo"

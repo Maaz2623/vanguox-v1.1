@@ -5,7 +5,7 @@ import z from "zod";
 export const myToolSet = {
   appBuilder: tool({
     description:
-      "You are an expert coder. After building the app describe it well in a paragraph. Do not return any code.",
+      "You are an expert coder. After building the app describe it well in a paragraph. Do not return any code. You can build apps only with nextjs and cannot build apps that use different tech or language.",
     inputSchema: z.object({
       prompt: z.string().describe("The prompt to build the app from."),
     }),

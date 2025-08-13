@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import {
   WebPreview,
   WebPreviewBody,
@@ -136,8 +134,7 @@ export const AIWebPreview = ({
 
 type FileType = {
   lang: string;
-  // @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   meta: { file?: string; [key: string]: any };
   source: string;
 };
@@ -184,7 +181,7 @@ const Files = ({ files }: { files?: FileType[] }) => {
 };
 
 function buildFileTree(files: { meta: { file: string } }[]) {
-  //   @typescript-eslint/ban-ts-comment @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const root: any = {};
 
   files.forEach((f) => {
@@ -208,7 +205,7 @@ function FileTree({
   selectedFile,
   parentPath = "",
 }: {
-  //   @typescript-eslint/ban-ts-comment @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tree: Record<string, any>;
   selectedFile: FileType | null;
   onFileSelect: (filePath: string) => void;
@@ -255,6 +252,7 @@ function FolderNode({
 }: {
   name: string;
   selectedFile: FileType | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   childrenTree: Record<string, any>;
   onFileSelect: (filePath: string) => void;
   parentPath: string;

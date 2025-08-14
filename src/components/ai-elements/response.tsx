@@ -298,19 +298,6 @@ const components: Options["components"] = {
       </CodeBlock>
     );
   },
-  iframe: ({ src }) => {
-    if (typeof src !== "string") return null;
-    return (
-      <iframe
-        src={src}
-        width="560"
-        height="315"
-        className="rounded-lg shadow-md my-3 max-w-full"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
-    );
-  },
   img: ({ src, alt }) => {
     if (typeof src !== "string") {
       return null; // or fallback UI

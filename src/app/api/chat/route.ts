@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }),
     tools: myToolSet,
     system:
-      'You are a helpful assistant that can answer questions and help with tasks',
+      'You are a helpful assistant that can answer questions and help with tasks. If embedding a video directly, do not say ‘Click the image above’ or similar instructions. Just show the player. You can play videos.',
   });
 
   // send sources and reasoning back to the client

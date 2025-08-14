@@ -197,16 +197,38 @@ const components: Options["components"] = {
       {children}
     </span>
   ),
-  a: ({ node, children, className, ...props }) => (
-    <a
-      className={cn("font-medium text-primary underline", className)}
-      rel="noreferrer"
-      target="_blank"
-      {...props}
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children, className, ...props }) => {
+    if (typeof href === "string") {
+      const ytMatch = href.match(
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/
+      );
+      if (ytMatch) {
+        const videoId = ytMatch[1];
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            width="560"
+            height="315"
+            className="rounded-lg shadow-md my-3 max-w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        );
+      }
+    }
+    return (
+      <a
+        className={cn("font-medium text-primary underline", className)}
+        rel="noreferrer"
+        target="_blank"
+        href={href}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
+
   h1: ({ node, children, className, ...props }) => (
     <h1
       className={cn("mt-6 mb-2 font-semibold text-3xl", className)}
@@ -276,6 +298,19 @@ const components: Options["components"] = {
       </CodeBlock>
     );
   },
+  iframe: ({ src }) => {
+    if (typeof src !== "string") return null;
+    return (
+      <iframe
+        src={src}
+        width="560"
+        height="315"
+        className="rounded-lg shadow-md my-3 max-w-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  },
   img: ({ src, alt }) => {
     if (typeof src !== "string") {
       return null; // or fallback UI
@@ -327,6 +362,26 @@ export const Response = memo(
           allowedImagePrefixes={allowedImagePrefixes ?? ["*"]}
           allowedLinkPrefixes={allowedLinkPrefixes ?? ["*"]}
           defaultOrigin={defaultOrigin}
+          allowedElements={[
+            "video",
+            "source",
+            "img",
+            "a",
+            "p",
+            "ol",
+            "ul",
+            "li",
+            "strong",
+            "em",
+            "code",
+            "pre",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+          ]}
           {...options}
         >
           {parsedChildren}

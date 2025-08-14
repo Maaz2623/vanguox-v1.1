@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         hostname: "uos1ovyqrd.ufs.sh"
+      },
+      {
+        hostname: "img.youtube.com"
       }
     ]
   }

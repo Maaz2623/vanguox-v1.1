@@ -50,7 +50,7 @@ export function ChatViewSwitcher() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent bg-neutral-200 dark:bg-neutral-800 data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent bg-neutral-50 dark:bg-neutral-800 data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                 <Image

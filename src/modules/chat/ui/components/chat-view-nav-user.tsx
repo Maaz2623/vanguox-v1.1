@@ -54,7 +54,7 @@ export function ChatViewNavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent bg-neutral-200 dark:bg-neutral-800 data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent bg-neutral-50 dark:bg-neutral-950 data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 {image && <AvatarImage src={image} alt={name} />}

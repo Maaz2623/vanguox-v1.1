@@ -24,7 +24,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { CodeBlock } from "@/components/ai-elements/code-block";
+import {
+  CodeBlock,
+  CodeBlockCopyButton,
+} from "@/components/ai-elements/code-block";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Sheet,
@@ -168,7 +171,7 @@ const Files = ({ files }: { files?: FileType[] }) => {
                 language={normalizeLang(selectedFile.lang)}
                 lang={selectedFile.lang}
                 code={selectedFile.source}
-              />
+              ></CodeBlock>
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

@@ -47,7 +47,7 @@ import Image from "next/image";
 import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
 import { AIWebPreview } from "@/ai/components/web-preview";
 import { FragmentSelector } from "@/ai/components/fragment-selector";
-import { AppBuilder } from "@/ai/tools";
+import { AppBuilder, ImageGenerator } from "@/ai/tools";
 
 interface Props {
   chatId: string;
@@ -167,7 +167,9 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     <div className="flex w-full h-screen">
       {/* Chat section */}
       <div
-        className={cn("flex flex-col h-full px-8 transition-all duration-300")}
+        className={cn(
+          "flex flex-col h-full px-8 transition-all duration-300 w-full"
+        )}
       >
         <Conversation className="flex-1 overflow-y-auto">
           <ConversationContent>
@@ -246,7 +248,27 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   </ReasoningContent>
                                 </Reasoning>
                               );
-
+                            case "tool-imageGenerator":
+                              switch (part.state) {
+                                case "input-available":
+                                  return (
+                                    <div key={i}>Generating your image...</div>
+                                  );
+                                case "output-available":
+                                  const output = part.output as ImageGenerator;
+                                  return (
+                                    <div key={i}>
+                                      {/* {output && output.url && (
+                                        <Image
+                                          src={output.url}
+                                          alt="Base64 Image"
+                                          width={400}
+                                          height={400}
+                                        />
+                                      )} */}
+                                    </div>
+                                  );
+                              }
                             case "tool-appBuilder":
                               switch (part.state) {
                                 case "input-available":
@@ -353,18 +375,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           </PromptInputToolbar>
         </PromptInput>
       </div>
-
-      {/* Preview section */}
-      {/* {appPreview && previewUrl && (
-        <div className="w-3/4 border-l border-gray-200 max-w-3/4">
-          <AIWebPreview
-            files={files}
-            setAppPreview={setAppPreview}
-            url={previewUrl}
-            setPreviewUrl={setPreviewUrl}
-          />
-        </div>
-      )} */}
       {appPreview && previewUrl && (
         <AIWebPreview
           open={fragmentOpen}

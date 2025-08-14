@@ -12,6 +12,7 @@ import remarkMath from "remark-math";
 import { cn } from "@/lib/utils";
 import "katex/dist/katex.min.css";
 import hardenReactMarkdown from "harden-react-markdown";
+import Image from "next/image";
 
 /**
  * Parses markdown text and removes incomplete tokens to prevent partial rendering
@@ -273,6 +274,23 @@ const components: Options["components"] = {
           onError={() => console.error("Failed to copy code to clipboard")}
         />
       </CodeBlock>
+    );
+  },
+  img: ({ src, alt }) => {
+    if (typeof src !== "string") {
+      return null; // or fallback UI
+    }
+
+    const isBase64 = src.startsWith("data:image");
+    return (
+      <Image
+        src={src}
+        alt={alt ?? ""}
+        width={350}
+        height={250}
+        unoptimized={isBase64}
+        className="rounded-lg shadow-md object-contain my-3"
+      />
     );
   },
 };

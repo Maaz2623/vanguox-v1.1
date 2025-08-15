@@ -248,6 +248,13 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   </ReasoningContent>
                                 </Reasoning>
                               );
+                            case "tool-webSearcher":
+                              switch (part.state) {
+                                case "input-available":
+                                  return (
+                                    <div key={i}>Searching the web...</div>
+                                  );
+                              }
                             case "tool-imageGenerator":
                               switch (part.state) {
                                 case "input-available":

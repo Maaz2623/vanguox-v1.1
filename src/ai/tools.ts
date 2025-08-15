@@ -27,6 +27,24 @@ async function base64ToFile(base64: string, mimeType: string, filename: string):
 }
 
 export const myToolSet = {
+  webSearcher: tool({
+    description: "Search through the web.",
+    inputSchema: z.object({
+      prompt: z.string("The prompt to search the web for")
+    }),
+    execute: async ({prompt}) => {
+      try {
+        const result = await generateText({
+          model: 'perplexity/sonar',
+          prompt: prompt
+        })
+        console.log(result.text)
+        return result.text
+      } catch (error) {
+        console.log(error)
+      }
+    } 
+  }),
   emailSender: tool({
     description: "Send an email to any recipient.",
     inputSchema: z.object({
@@ -44,7 +62,7 @@ export const myToolSet = {
         const senderName = authData?.user.name
 
         const data = await resend.emails.send({
-          from: `${senderName || 'Your App'} <no-reply@vanguox.com>`, // must be your verified domain
+          from: `${senderName || 'Your App'} ^${authData?.user.email}^ <@vanguox.com>`, // must be your verified domain
           to: [to],
           subject,
           text: message,

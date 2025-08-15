@@ -90,10 +90,7 @@ const Form = () => {
               <PromptInputButton>
                 <MicIcon size={16} />
               </PromptInputButton>
-              <PromptInputButton>
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </PromptInputButton>
+
               <PromptInputModelSelect
                 onValueChange={(value) => {
                   setModel(value);

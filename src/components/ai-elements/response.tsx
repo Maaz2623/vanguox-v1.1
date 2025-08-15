@@ -199,6 +199,17 @@ const components: Options["components"] = {
   ),
   a: ({ href, children, className, ...props }) => {
     if (typeof href === "string") {
+      const fragmentMatch =
+        typeof href === "string" && href.includes(".vusercontent.net");
+
+      if (fragmentMatch) {
+        return (
+          <div>
+            haha
+            {href}
+          </div>
+        );
+      }
       const ytMatch = href.match(
         /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/
       );

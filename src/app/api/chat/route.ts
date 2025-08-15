@@ -1,5 +1,6 @@
 import { saveChat, updateChatTitle } from '@/ai/functions';
 import { myToolSet } from '@/ai/tools';
+import { systemPrompt } from '@/prompt';
 import { streamText, UIMessage, convertToModelMessages, createIdGenerator, smoothStream } from 'ai';
 
 
@@ -17,11 +18,10 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     experimental_transform: smoothStream({
       delayInMs: 50,
-      chunking: "word"
+      chunking: "word",
     }),
     tools: myToolSet,
-    system:
-      'You are a helpful assistant that can answer questions and help with tasks. If the user asks to play youtube videos or other tasks that require web search, tell him/her to enable web search module and query again.',
+    system: systemPrompt,
   });
 
   // send sources and reasoning back to the client

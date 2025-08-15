@@ -33,7 +33,13 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
-import { CheckIcon, CopyIcon, GlobeIcon, RefreshCcwIcon } from "lucide-react";
+import {
+  CheckIcon,
+  CopyIcon,
+  GlobeIcon,
+  PlusIcon,
+  RefreshCcwIcon,
+} from "lucide-react";
 import { Response } from "@/components/ai-elements/response";
 import { Action, Actions } from "@/components/ai-elements/actions";
 import { cn } from "@/lib/utils";
@@ -48,6 +54,7 @@ import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
 import { AIWebPreview } from "@/ai/components/web-preview";
 import { FragmentSelector } from "@/ai/components/fragment-selector";
 import { AppBuilder, ImageGenerator } from "@/ai/tools";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   chatId: string;
@@ -255,6 +262,13 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                     <div key={i}>Searching the web...</div>
                                   );
                               }
+                            case "tool-emailSender":
+                              switch (part.state) {
+                                case "input-streaming":
+                                  return <div key={i}>Drafting email...</div>;
+                                case "input-available":
+                                  return <div>Sending your email...</div>;
+                              }
                             case "tool-imageGenerator":
                               switch (part.state) {
                                 case "input-available":
@@ -262,7 +276,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                     <div key={i}>Generating your image...</div>
                                   );
                                 case "output-available":
-                                  const output = part.output as ImageGenerator;
                                   return (
                                     <div key={i}>
                                       {/* {output && output.url && (
@@ -341,13 +354,9 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           />
           <PromptInputToolbar>
             <PromptInputTools>
-              <PromptInputButton
-                variant={webSearch ? "default" : "ghost"}
-                onClick={() => setWebsearch(!webSearch)}
-              >
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </PromptInputButton>
+              <Button variant={"ghost"}>
+                <PlusIcon size={16} />
+              </Button>
               <PromptInputModelSelect
                 onValueChange={(value) => {
                   setModel(value);

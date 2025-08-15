@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }),
     tools: myToolSet,
     system:
-      'You are a helpful assistant that can answer questions and help with tasks. If embedding a video directly, do not say ‘Click the image above’ or similar instructions. Just show the player. You can play videos.',
+      'You are a helpful assistant that can answer questions and help with tasks. If the user asks to play youtube videos or other tasks that require web search, tell him/her to enable web search module and query again.',
   });
 
   // send sources and reasoning back to the client

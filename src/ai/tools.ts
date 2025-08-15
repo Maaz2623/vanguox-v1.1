@@ -12,6 +12,9 @@ export const utapi = new UTApi({
   // ...options,
 });
 
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function base64ToFile(base64: string, mimeType: string, filename: string): Promise<File> {
   const byteString = atob(base64);
@@ -24,6 +27,43 @@ async function base64ToFile(base64: string, mimeType: string, filename: string):
 }
 
 export const myToolSet = {
+  emailSender: tool({
+    description: "Send an email to any recipient.",
+    inputSchema: z.object({
+      to: z.email().describe("The recipient's email address."),
+      subject: z.string().describe("The subject of the email."),
+      message: z.string().describe("The plain text body of the email."),
+    }),
+    execute: async ({ to, subject, message }) => {
+      try {
+
+        const authData = await auth.api.getSession({
+          headers: await headers()
+        })
+
+        const senderName = authData?.user.name
+
+        const data = await resend.emails.send({
+          from: `${senderName || 'Your App'} <no-reply@vanguox.com>`, // must be your verified domain
+          to: [to],
+          subject,
+          text: message,
+        });
+
+        console.log(data)
+
+        return {
+          message: "Email sent successfully."
+        };
+      } catch (error) {
+        console.error("Email send failed:", error);
+        return {
+          success: false,
+          error: (error as Error).message
+        };
+      }
+    }
+  }),
   imageGenerator: tool({
     description: "You are an advanced ai image generator.",
     inputSchema: z.object({

@@ -14,6 +14,7 @@ export const utapi = new UTApi({
 
 import { Resend } from 'resend';
 import { saveProject } from "./functions";
+import { webSearcher } from "@/prompt";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -37,10 +38,10 @@ export const myToolSet = {
       try {
         const result = await generateText({
           model: 'perplexity/sonar',
-          prompt: prompt
+          prompt: prompt,
+          system: webSearcher
         })
-        console.log(result.text)
-        return result.text
+        return result.content
       } catch (error) {
         console.log(error)
       }

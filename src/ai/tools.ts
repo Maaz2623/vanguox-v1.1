@@ -13,6 +13,7 @@ export const utapi = new UTApi({
 });
 
 import { Resend } from 'resend';
+import { saveProject } from "./functions";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -62,7 +63,7 @@ export const myToolSet = {
         const senderName = authData?.user.name
 
         const data = await resend.emails.send({
-          from: `${senderName || 'Your App'} ^${authData?.user.email}^ <@vanguox.com>`, // must be your verified domain
+          from: `${senderName || 'Your App'} ^${authData?.user.email}^ <no-reply@vanguox.com>`, // must be your verified domain
           to: [to],
           subject,
           text: message,
@@ -137,7 +138,7 @@ export const myToolSet = {
   }),
   appBuilder: tool({
     description:
-      "You are an expert coder. After building the app describe it well in a paragraph. Do not return any code. You can build apps only with nextjs and cannot build apps that use different tech or language.",
+      "You are an expert coder.",
     inputSchema: z.object({
       prompt: z.string().describe("The prompt to build the app from."),
     }),
@@ -151,6 +152,12 @@ export const myToolSet = {
           thinking: false,
         },
       });
+
+      await saveProject(
+        result.demo as string,
+        result.files,
+        result.title as string
+      )
 
       return {
         webUrl: result.demo,

@@ -1,3 +1,4 @@
+import { AppBuilder } from '@/ai/tools';
 import { UIMessage } from 'ai';
 import { boolean, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
@@ -69,6 +70,16 @@ export const filesTable = pgTable("files", {
 	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	url: text("url").notNull(),
 	mediaType: text("media_type").notNull(),
+	userId: text("user_id").references(() => user.id).notNull(),
+	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
+ 	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
+})
+
+export const projectsTable = pgTable("projects", {
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	url: text("url").notNull(),
+	title: text("title"),
+	files: jsonb("files").$type<AppBuilder["files"]>().notNull(),
 	userId: text("user_id").references(() => user.id).notNull(),
 	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
  	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())

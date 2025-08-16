@@ -37,6 +37,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 interface Props {
   open: boolean;
@@ -47,6 +49,18 @@ interface Props {
 const Preview = ({ open, setOpen, url }: Props) => {
   const [previewUrl, setPreviewUrl] = useState(url);
   const [viewType, setViewType] = useState<"preview" | "code">("preview");
+
+  const trpc = useTRPC();
+
+  const cleaned = previewUrl && previewUrl.replace(/\/$/, "");
+  console.log(cleaned);
+
+  const { data } = useQuery(
+    trpc.projects.queryOptions({
+      url: cleaned!,
+    })
+  );
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="right" className="w-[80vw]! max-w-[1000px]! p-0!">
@@ -82,14 +96,7 @@ const Preview = ({ open, setOpen, url }: Props) => {
             </div>
             <div className="flex">
               {url && (
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setPreviewUrl(undefined);
-                  }}
-                >
+                <Button asChild variant="ghost" size="icon" onClick={() => {}}>
                   <Link href={url} target="_blank">
                     <ArrowUpRightFromSquareIcon />
                   </Link>
@@ -99,7 +106,7 @@ const Preview = ({ open, setOpen, url }: Props) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setPreviewUrl(undefined);
+                  setOpen(false);
                 }}
               >
                 <XIcon />
@@ -109,8 +116,7 @@ const Preview = ({ open, setOpen, url }: Props) => {
           {viewType === "preview" ? (
             <WebPreviewBody src={url} />
           ) : (
-            // <Files files={files} />
-            <div>Files</div>
+            <div>{data && <Files files={data.files} />}</div>
           )}
           {viewType === "preview" && <WebPreviewConsole />}
         </WebPreview>
@@ -121,10 +127,30 @@ const Preview = ({ open, setOpen, url }: Props) => {
 
 export const PreviewWrapper = ({ url }: { url: string }) => {
   const [open, setOpen] = useState(false);
+
+  const cleaned = url && url.replace(/\/$/, "");
+  console.log(cleaned);
+
+  const trpc = useTRPC();
+
+  const { data } = useQuery(
+    trpc.projects.queryOptions({
+      url: cleaned!,
+    })
+  );
+
+  if (!url) {
+    return <div>Loading</div>;
+  }
   return (
     <>
-      <Button onClick={() => setOpen(true)} variant="outline" className="my-3">
-        Preview <ChevronRightIcon />
+      <Button
+        onClick={() => setOpen(true)}
+        variant="outline"
+        size={`lg`}
+        className="my-3"
+      >
+        {data ? data.title : "Preview"} <ChevronRightIcon />
       </Button>
       <Preview open={open} setOpen={setOpen} url={url} />
     </>

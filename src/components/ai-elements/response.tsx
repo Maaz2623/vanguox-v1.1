@@ -202,6 +202,26 @@ const components: Options["components"] = {
   ),
   a: ({ href, children, className, ...props }) => {
     if (typeof href === "string") {
+      if (href.includes("open.spotify.com")) {
+        // convert to embed url
+        const embedUrl = href.replace(
+          "open.spotify.com/",
+          "open.spotify.com/embed/"
+        );
+        return (
+          <iframe
+            style={{ borderRadius: "12px" }}
+            src={embedUrl}
+            width="100%"
+            height="152"
+            frameBorder="0"
+            className="my-3"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+        );
+      }
+
       const fragmentMatch =
         typeof href === "string" && href.includes(".vusercontent.net");
 
@@ -231,7 +251,7 @@ const components: Options["components"] = {
     }
     return (
       <a
-        className={cn("font-medium text-primary underline", className)}
+        className={cn("font-medium underline", className)}
         rel="noreferrer"
         target="_blank"
         href={href}

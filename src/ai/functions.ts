@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { messagesTable } from "@/db/schema";
+import { messagesTable, projectsTable } from "@/db/schema";
 import { google } from "@ai-sdk/google";
 import { UIMessage, convertToModelMessages, generateText } from "ai";
 import { ConvexHttpClient } from "convex/browser";
@@ -52,6 +52,9 @@ export async function updateChatTitle({
 }
 
 import { inArray } from "drizzle-orm"; // if not already imported
+import { AppBuilder } from "./tools";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function saveChat({
   chatId,
@@ -104,4 +107,30 @@ export async function base64ToFile(base64: string, mimeType: string, filename: s
     intArray[i] = byteString.charCodeAt(i);
   }
   return new File([intArray], filename, { type: mimeType });
+}
+
+
+export async function saveProject(url: string, files: AppBuilder["files"], title: string) {
+
+  const authData = await auth.api.getSession({
+    headers: await headers()
+  })
+
+  if(!authData) return
+
+  const newFiles = await db.insert(projectsTable).values({
+    url: url,
+    files: files,
+    userId: authData.user.id,
+    title: title
+  })
+
+  return newFiles
+}
+
+
+export async function getProject(url: string) {
+  const project = await db.select().from(projectsTable).where(eq(projectsTable.url, url))
+
+  return project
 }

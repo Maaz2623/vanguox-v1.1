@@ -122,21 +122,19 @@
 }
 
 
-/* For Chrome, Edge, and Safari */
 ::-webkit-scrollbar {
-  width: 4px; /* Makes it thinner */
+  width: 4px; 
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent; /* Removes the thumb */
+  background: transparent; 
 }
 
 ::-webkit-scrollbar-track {
-  background: black; /* Optional: hides track */
+  background: black;
 }
 
-/* For Firefox */
 * {
-  scrollbar-width: thin; /* Makes it thinner */
-  scrollbar-color: transparent transparent; /* No thumb color */
+  scrollbar-width: thin; 
+  scrollbar-color: transparent transparent; 
 }

@@ -51,9 +51,6 @@ import {
 import { Loader } from "@/components/ai-elements/loader";
 import Image from "next/image";
 import { AppBuilderLoader } from "@/ai/components/app-builder-loader";
-import { AIWebPreview } from "@/ai/components/web-preview";
-import { FragmentSelector } from "@/ai/components/fragment-selector";
-import { AppBuilder, ImageGenerator } from "@/ai/tools";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -71,8 +68,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
   const initialMessage = searchParams.get("message");
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const [fragmentOpen, setFragmentOpen] = useState(false);
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -98,8 +93,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
 
   const hasSentInitialMessage = useRef(false);
 
-  const [appPreview, setAppPreview] = useState(false);
-
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
@@ -113,10 +106,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     url.searchParams.delete("message");
     window.history.replaceState({}, "", url.toString());
   }, [initialMessage, sendMessage]);
-
-  const [previewUrl, setPreviewUrl] = useState<AppBuilder["webUrl"]>(undefined);
-
-  const [files, setFiles] = useState<AppBuilder["files"]>(undefined);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -137,38 +126,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
     );
     setPrompt("");
   };
-
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-
-    let webUrl: string | null = null;
-    let files: AppBuilder["files"] | null = undefined;
-    const lastHasOutput =
-      lastMessage?.parts?.some((p) => {
-        if (p.type === "tool-appBuilder" && p.state === "output-available") {
-          webUrl =
-            (
-              p.output as {
-                webUrl: string;
-              }
-            ).webUrl ?? null;
-          files = (p.output as AppBuilder).files ?? null;
-          return true;
-        }
-        return false;
-      }) ?? false;
-
-    if (lastHasOutput && webUrl) {
-      setAppPreview(true);
-      setPreviewUrl(webUrl);
-      setFiles(files);
-      setFragmentOpen(true);
-    } else {
-      setAppPreview(false);
-      setPreviewUrl(undefined);
-      setFiles(undefined);
-    }
-  }, [messages]);
 
   return (
     <div className="flex w-full h-screen">
@@ -293,23 +250,23 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                               switch (part.state) {
                                 case "input-available":
                                   return <AppBuilderLoader key={i} />;
-                                case "output-available":
-                                  const output = part.output as AppBuilder;
-                                  return (
-                                    <div className="my-3" key={output.webUrl}>
-                                      <FragmentSelector
-                                        files={output.files}
-                                        previewUrl={previewUrl}
-                                        setAppPreview={setAppPreview}
-                                        setPreviewUrl={setPreviewUrl}
-                                        setFiles={setFiles}
-                                        webUrl={output.webUrl}
-                                        key={output.webUrl}
-                                        setOpen={setFragmentOpen}
-                                        open={fragmentOpen}
-                                      />
-                                    </div>
-                                  );
+                                // case "output-available":
+                                //   const output = part.output as AppBuilder;
+                                //   return (
+                                //     <div className="my-3" key={output.webUrl}>
+                                //       <FragmentSelector
+                                //         files={output.files}
+                                //         previewUrl={previewUrl}
+                                //         setAppPreview={setAppPreview}
+                                //         setPreviewUrl={setPreviewUrl}
+                                //         setFiles={setFiles}
+                                //         webUrl={output.webUrl}
+                                //         key={output.webUrl}
+                                //         setOpen={setFragmentOpen}
+                                //         open={fragmentOpen}
+                                //       />
+                                //     </div>
+                                //   );
                               }
                             default:
                               return null;
@@ -391,16 +348,6 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           </PromptInputToolbar>
         </PromptInput>
       </div>
-      {appPreview && previewUrl && (
-        <AIWebPreview
-          open={fragmentOpen}
-          setOpen={setFragmentOpen}
-          files={files}
-          setAppPreview={setAppPreview}
-          url={previewUrl}
-          setPreviewUrl={setPreviewUrl}
-        />
-      )}
     </div>
   );
 };

@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 import "katex/dist/katex.min.css";
 import hardenReactMarkdown from "harden-react-markdown";
 import Image from "next/image";
+import { Button } from "../ui/button";
+import { ChevronRightIcon } from "lucide-react";
+import { PreviewWrapper } from "@/ai/components/preview";
 
 /**
  * Parses markdown text and removes incomplete tokens to prevent partial rendering
@@ -204,10 +207,9 @@ const components: Options["components"] = {
 
       if (fragmentMatch) {
         return (
-          <div>
-            haha
-            {href}
-          </div>
+          <span>
+            <PreviewWrapper url={href} />
+          </span>
         );
       }
       const ytMatch = href.match(

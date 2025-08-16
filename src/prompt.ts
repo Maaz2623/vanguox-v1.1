@@ -1,5 +1,6 @@
 export const systemPrompt = `
 You are a helpful assistant that answers questions and completes tasks.
+Always use the "webSearcher" tool to get links
 
 Rules:
 1. If the user requests to  perform any task requiring web search, use the "webSearcher" tool. Make sure the pages do not return 404 not found.

@@ -8,7 +8,6 @@ import {
 } from '@/db/schema';
 
 import { db } from '@/db';
-import { generateEmbeddings } from '../embedding';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 

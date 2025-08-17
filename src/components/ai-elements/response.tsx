@@ -13,8 +13,6 @@ import { cn } from "@/lib/utils";
 import "katex/dist/katex.min.css";
 import hardenReactMarkdown from "harden-react-markdown";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import { ChevronRightIcon } from "lucide-react";
 import { PreviewWrapper } from "@/ai/components/preview";
 
 /**
@@ -202,8 +200,8 @@ const components: Options["components"] = {
   ),
   a: ({ href, children, className, ...props }) => {
     if (typeof href === "string") {
+      // ---- Spotify embed ----
       if (href.includes("open.spotify.com")) {
-        // convert to embed url
         const embedUrl = href.replace(
           "open.spotify.com/",
           "open.spotify.com/embed/"
@@ -222,16 +220,7 @@ const components: Options["components"] = {
         );
       }
 
-      const fragmentMatch =
-        typeof href === "string" && href.includes(".vusercontent.net");
-
-      if (fragmentMatch) {
-        return (
-          <span>
-            <PreviewWrapper url={href} />
-          </span>
-        );
-      }
+      // ---- YouTube embed ----
       const ytMatch = href.match(
         /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/
       );
@@ -249,6 +238,8 @@ const components: Options["components"] = {
         );
       }
     }
+
+    // fallback → normal link
     return (
       <a
         className={cn("font-medium underline", className)}

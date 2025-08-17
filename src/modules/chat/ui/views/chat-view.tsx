@@ -7,7 +7,6 @@ import {
 
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
@@ -29,17 +28,22 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import {
+  FileIcon,
+  FileImageIcon,
+  FileTextIcon,
+  FileArchiveIcon,
+  FileCodeIcon,
+  FileAudioIcon,
+  FileVideoIcon,
+  FileSpreadsheetIcon,
+  XIcon,
+} from "lucide-react";
+import {
   Message,
   MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
-import {
-  CheckIcon,
-  CopyIcon,
-  GlobeIcon,
-  PlusIcon,
-  RefreshCcwIcon,
-} from "lucide-react";
+import { CheckIcon, CopyIcon, PlusIcon, RefreshCcwIcon } from "lucide-react";
 import { Response } from "@/components/ai-elements/response";
 import { Action, Actions } from "@/components/ai-elements/actions";
 import { cn } from "@/lib/utils";
@@ -58,13 +62,39 @@ interface Props {
   initialMessages: UIMessage[];
 }
 
+// ✅ File conversion helper
+async function convertFilesToDataURLs(files: FileList) {
+  return Promise.all(
+    Array.from(files).map(
+      (file) =>
+        new Promise<{
+          type: "file";
+          mediaType: string;
+          url: string;
+        }>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({
+              type: "file",
+              mediaType: file.type,
+              url: reader.result as string,
+            });
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        })
+    )
+  );
+}
+
 export const ChatView = ({ chatId, initialMessages }: Props) => {
   const searchParams = useSearchParams();
 
-  const [webSearch, setWebsearch] = useState(false);
+  const [webSearch] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<FileList | undefined>(undefined);
 
   const [model, setModel] = useState<string>(models[0].id);
-
   const initialMessage = searchParams.get("message");
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -72,9 +102,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    setTimeout(() => {
-      setCopiedId(null);
-    }, 2000);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const { messages, status, sendMessage, stop, regenerate } = useChat({
@@ -92,31 +120,35 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
   });
 
   const hasSentInitialMessage = useRef(false);
-
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
     if (!initialMessage || hasSentInitialMessage.current) return;
-
     sendMessage({ text: initialMessage });
     hasSentInitialMessage.current = true;
 
-    // Remove the query param from the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("message");
     window.history.replaceState({}, "", url.toString());
   }, [initialMessage, sendMessage]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // ✅ updated handleSubmit with file support
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "streaming") {
       stop();
       return;
     }
+    if (!prompt.trim() && !files?.length) return;
 
-    if (!prompt.trim()) return; // Avoid sending empty messages
+    const fileParts =
+      files && files.length > 0 ? await convertFilesToDataURLs(files) : [];
+
     sendMessage(
-      { text: prompt },
+      {
+        role: "user",
+        parts: [{ type: "text", text: prompt }, ...fileParts],
+      },
       {
         body: {
           model: model,
@@ -124,11 +156,27 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
         },
       }
     );
+
     setPrompt("");
+    setFiles(undefined);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
     <div className="flex w-full h-screen">
+      <input
+        type="file"
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={(event) => {
+          if (event.target.files) {
+            setFiles(event.target.files);
+          }
+        }}
+        multiple
+        ref={fileInputRef}
+      />
+
       {/* Chat section */}
       <div
         className={cn(
@@ -137,7 +185,7 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
       >
         <Conversation className="flex-1 overflow-y-auto">
           <ConversationContent>
-            <div className={cn("w-3/4 mx-auto pb-32")}>
+            <div className="w-3/4 mx-auto pb-32">
               {messages.map((message) => (
                 <div key={message.id} className="flex items-start">
                   <Message
@@ -167,10 +215,8 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                           switch (part.type) {
                             case "text":
                               return (
-                                <div className="" key={i}>
-                                  <Response key={`${message.id}-${i}`}>
-                                    {part.text}
-                                  </Response>
+                                <div key={i}>
+                                  <Response>{part.text}</Response>
                                   {message.role === "assistant" && (
                                     <Actions className="mt-2 -ml-2">
                                       <Action
@@ -198,7 +244,32 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                   )}
                                 </div>
                               );
-
+                            case "file":
+                              if (part.mediaType?.startsWith("image/")) {
+                                return (
+                                  <Image
+                                    key={`${message.id}-image-${i}`}
+                                    src={part.url}
+                                    width={400}
+                                    height={400}
+                                    alt={`attachment-${i}`}
+                                    className="rounded-lg"
+                                  />
+                                );
+                              }
+                              if (part.mediaType === "application/pdf") {
+                                return (
+                                  <iframe
+                                    key={`${message.id}-pdf-${i}`}
+                                    src={part.url}
+                                    width={500}
+                                    height={600}
+                                    className="rounded-lg border"
+                                    title={`pdf-${i}`}
+                                  />
+                                );
+                              }
+                              return null;
                             case "reasoning":
                               return (
                                 <Reasoning
@@ -213,61 +284,25 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
                                 </Reasoning>
                               );
                             case "tool-webSearcher":
-                              switch (part.state) {
-                                case "input-available":
-                                  return (
-                                    <div key={i}>Searching the web...</div>
-                                  );
-                              }
+                              return part.state === "input-available" ? (
+                                <div key={i}>Searching the web...</div>
+                              ) : null;
                             case "tool-emailSender":
-                              switch (part.state) {
-                                case "input-streaming":
-                                  return <div key={i}>Drafting email...</div>;
-                                case "input-available":
-                                  return <div>Sending your email...</div>;
-                              }
+                              if (part.state === "input-streaming")
+                                return <div key={i}>Drafting email...</div>;
+                              if (part.state === "input-available")
+                                return <div key={i}>Sending your email...</div>;
+                              return null;
                             case "tool-imageGenerator":
-                              switch (part.state) {
-                                case "input-available":
-                                  return (
-                                    <div key={i}>Generating your image...</div>
-                                  );
-                                case "output-available":
-                                  return (
-                                    <div key={i}>
-                                      {/* {output && output.url && (
-                                        <Image
-                                          src={output.url}
-                                          alt="Base64 Image"
-                                          width={400}
-                                          height={400}
-                                        />
-                                      )} */}
-                                    </div>
-                                  );
-                              }
+                              if (part.state === "input-available")
+                                return (
+                                  <div key={i}>Generating your image...</div>
+                                );
+                              return null;
                             case "tool-appBuilder":
-                              switch (part.state) {
-                                case "input-available":
-                                  return <AppBuilderLoader key={i} />;
-                                // case "output-available":
-                                //   const output = part.output as AppBuilder;
-                                //   return (
-                                //     <div className="my-3" key={output.webUrl}>
-                                //       <FragmentSelector
-                                //         files={output.files}
-                                //         previewUrl={previewUrl}
-                                //         setAppPreview={setAppPreview}
-                                //         setPreviewUrl={setPreviewUrl}
-                                //         setFiles={setFiles}
-                                //         webUrl={output.webUrl}
-                                //         key={output.webUrl}
-                                //         setOpen={setFragmentOpen}
-                                //         open={fragmentOpen}
-                                //       />
-                                //     </div>
-                                //   );
-                              }
+                              if (part.state === "input-available")
+                                return <AppBuilderLoader key={i} />;
+                              return null;
                             default:
                               return null;
                           }
@@ -284,10 +319,13 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
         </Conversation>
 
         {/* Input bar */}
-        <PromptInput
-          onSubmit={handleSubmit}
-          className={cn("w-3/4 mx-auto p-1 mb-2")}
-        >
+        <PromptInput onSubmit={handleSubmit} className="w-3/4 mx-auto p-1 mb-2">
+          {files && (
+            <div>
+              <FilesPreview files={files} setFiles={setFiles} />
+            </div>
+          )}
+
           <TextAreaAutoSize
             rows={1}
             disabled={status === "submitted"}
@@ -311,13 +349,16 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           />
           <PromptInputToolbar>
             <PromptInputTools>
-              <Button variant={"ghost"}>
+              {/* File upload button */}
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <PlusIcon size={16} />
               </Button>
               <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value);
-                }}
+                onValueChange={(value) => setModel(value)}
                 value={model}
               >
                 <PromptInputModelSelectTrigger>
@@ -348,6 +389,84 @@ export const ChatView = ({ chatId, initialMessages }: Props) => {
           </PromptInputToolbar>
         </PromptInput>
       </div>
+    </div>
+  );
+};
+
+const getFileIcon = (file: File) => {
+  if (file.type.startsWith("image/"))
+    return <FileImageIcon className="w-5 h-5 text-blue-500" />;
+  if (file.type.startsWith("video/"))
+    return <FileVideoIcon className="w-5 h-5 text-purple-500" />;
+  if (file.type.startsWith("audio/"))
+    return <FileAudioIcon className="w-5 h-5 text-pink-500" />;
+  if (file.type === "application/pdf")
+    return <FileTextIcon className="w-5 h-5 text-red-500" />;
+  if (
+    file.type === "application/zip" ||
+    file.type === "application/x-zip-compressed"
+  )
+    return <FileArchiveIcon className="w-5 h-5 text-yellow-500" />;
+
+  if (
+    file.type.includes("spreadsheet") ||
+    file.name.endsWith(".xls") ||
+    file.name.endsWith(".xlsx")
+  )
+    return <FileSpreadsheetIcon className="w-5 h-5 text-green-500" />;
+
+  if (
+    file.type.includes("json") ||
+    file.type.includes("javascript") ||
+    file.type.includes("typescript") ||
+    file.type.includes("html") ||
+    file.type.includes("css")
+  )
+    return <FileCodeIcon className="w-5 h-5 text-gray-600" />;
+
+  return <FileIcon className="w-5 h-5 text-gray-400" />;
+};
+
+const FilesPreview = ({
+  files,
+  setFiles,
+}: {
+  files: FileList;
+  setFiles: React.Dispatch<React.SetStateAction<FileList | undefined>>;
+}) => {
+  const fileArray = Array.from(files);
+
+  const handleRemove = (index: number) => {
+    const dt = new DataTransfer();
+    fileArray.forEach((f, i) => {
+      if (i !== index) dt.items.add(f);
+    });
+
+    const updatedFiles = dt.files;
+    setFiles(updatedFiles.length > 0 ? updatedFiles : undefined);
+
+    // also reset <input> so you can re-upload the same file if needed
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    if (input) input.files = updatedFiles;
+  };
+
+  return (
+    <div className="flex gap-2 flex-wrap p-2 max-h-[400px] overflow-y-auto">
+      {fileArray.map((file, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg text-sm shadow-sm"
+        >
+          {getFileIcon(file)}
+          <span className="truncate max-w-[150px]">{file.name}</span>
+          <XIcon
+            className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500"
+            onClick={() => handleRemove(index)}
+          />
+        </div>
+      ))}
     </div>
   );
 };

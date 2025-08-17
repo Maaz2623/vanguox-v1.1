@@ -15,6 +15,8 @@ export const utapi = new UTApi({
 import { Resend } from 'resend';
 import { saveProject } from "./functions";
 import { webSearcher } from "@/prompt";
+import { createResource } from "./actions/resource";
+import { findRelevantContent } from "./embedding";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -29,6 +31,38 @@ async function base64ToFile(base64: string, mimeType: string, filename: string):
 }
 
 export const myToolSet = {
+  getInformation: tool({
+        description: `get information from your knowledge base to answer questions.`,
+        inputSchema: z.object({
+          question: z.string().describe('the users question'),
+        }),
+        execute: async ({ question }) => {
+          const authData = await auth.api.getSession({
+            headers: await headers()
+          })
+          if(!authData) return
+           const results = await findRelevantContent(question, authData.user.id)
+  return results.length > 0
+    ? results.map(r => r.name).join("\n")
+    : "I couldn’t find anything in memory."
+        } 
+      }),
+  addResource: tool({
+        description: `add a resource to your knowledge base.
+          If the user provides a random piece of knowledge unprompted, use this tool without asking for confirmation.`,
+        inputSchema: z.object({
+          content: z
+            .string()
+            .describe('the content or resource to add to the knowledge base'),
+        }),
+        execute: async ({ content }) => {
+          const authData = await auth.api.getSession({
+            headers: await headers()
+          })
+          if(!authData) return
+          createResource({ content, userId: authData.user.id })
+        } 
+      }),
   webSearcher: tool({
     description: "Search through the web.",
     inputSchema: z.object({

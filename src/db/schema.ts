@@ -1,6 +1,10 @@
 import { AppBuilder } from '@/ai/tools';
 import { UIMessage } from 'ai';
-import { boolean, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { boolean, index, jsonb, pgTable, text, timestamp, uuid, varchar, vector } from 'drizzle-orm/pg-core';
+import z from 'zod';
+import {createSelectSchema} from 'drizzle-zod'
+import { nanoid } from '@/lib/utils';
 
 
 
@@ -84,3 +88,55 @@ export const projectsTable = pgTable("projects", {
 	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
  	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
 })
+
+
+
+export const resources = pgTable("resources", {
+  id: varchar("id", { length: 191 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  content: text("content").notNull(),
+ userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .default(sql`now()`),
+});
+
+// Schema for resources - used to validate API requests
+export const insertResourceSchema = createSelectSchema(resources)
+  .extend({})
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  });
+
+// Type for resources - used to type API request params and within Components
+export type NewResourceParams = z.infer<typeof insertResourceSchema>;
+
+export const embeddingsTable = pgTable(
+  'embeddings',
+  {
+    id: varchar('id', { length: 191 })
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    resourceId: varchar('resource_id', { length: 191 }).references(
+      () => resources.id,
+      { onDelete: 'cascade' },
+    ),
+    content: text('content').notNull(),
+    embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+  },
+  table => ({
+    embeddingIndex: index('embeddingIndex').using(
+      'hnsw',
+      table.embedding.op('vector_cosine_ops'),
+    ),
+  }),
+);

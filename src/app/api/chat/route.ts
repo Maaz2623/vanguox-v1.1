@@ -1,7 +1,9 @@
 import { saveChat, updateChatTitle } from '@/ai/functions';
 import { myToolSet } from '@/ai/tools';
+import { auth } from '@/lib/auth';
 import { systemPrompt } from '@/prompt';
 import { streamText, UIMessage, convertToModelMessages, createIdGenerator, smoothStream } from 'ai';
+import { headers } from 'next/headers';
 
 
 export async function POST(req: Request) {
@@ -13,6 +15,12 @@ export async function POST(req: Request) {
   }: { messages: UIMessage[]; model: string; webSearch: boolean, id: string } =
     await req.json();
 
+    const authData = await auth.api.getSession({
+      headers: await headers()
+    })
+
+    if(!authData) throw new Error("Unauthorized")
+
   const result = streamText({
     model: webSearch ? 'perplexity/sonar' : model,
     messages: convertToModelMessages(messages),
@@ -21,7 +29,7 @@ export async function POST(req: Request) {
       chunking: "word",
     }),
     tools: myToolSet,
-    system: systemPrompt,
+    system: `${systemPrompt}. The name of the user is ${authData.user.name}`,
   });
 
   // send sources and reasoning back to the client

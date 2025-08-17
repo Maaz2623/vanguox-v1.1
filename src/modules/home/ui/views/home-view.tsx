@@ -16,7 +16,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { TypeAnimation } from "react-type-animation";
 import TextAreaAutoSize from "react-textarea-autosize";
-import { GlobeIcon, MicIcon } from "lucide-react";
+import { MicIcon } from "lucide-react";
 import { models } from "@/models";
 import { useState } from "react";
 

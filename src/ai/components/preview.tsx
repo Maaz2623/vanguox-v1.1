@@ -15,8 +15,7 @@ import {
   FolderIcon,
   XIcon,
 } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
-import { AppBuilder } from "../tools";
+import { useState } from "react";
 import Link from "next/link";
 import { cn, normalizeLang } from "@/lib/utils";
 import {
@@ -25,10 +24,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  CodeBlock,
-  CodeBlockCopyButton,
-} from "@/components/ai-elements/code-block";
+import { CodeBlock } from "@/components/ai-elements/code-block";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Sheet,
@@ -47,7 +43,7 @@ interface Props {
 }
 
 const Preview = ({ open, setOpen, url }: Props) => {
-  const [previewUrl, setPreviewUrl] = useState(url);
+  const [previewUrl] = useState(url);
   const [viewType, setViewType] = useState<"preview" | "code">("preview");
 
   const trpc = useTRPC();

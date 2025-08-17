@@ -10,6 +10,7 @@ import {
 import { db } from '@/db';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { generateEmbeddings } from '../embedding';
 
 export const createResource = async (input: NewResourceParams) => {
   try {
